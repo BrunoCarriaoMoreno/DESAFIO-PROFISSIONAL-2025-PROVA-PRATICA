@@ -1,7 +1,8 @@
-import { Controller, Body, Get, Param, Post, Put } from '@nestjs/common';
+import { Controller, Body, Get, Param, Post, Put, Delete } from '@nestjs/common';
 import { ItemMagicoService } from './item-magico.service';
 import { CreateItemMagicoDto } from './dto/create-item-magico.dto';
 import { ApiTags, ApiOperation, ApiParam } from '@nestjs/swagger';
+import { ItemMagico } from './schemas/item-magico.schema';
 
 @ApiTags('item-magico')
 @Controller('item-magico')
@@ -24,7 +25,7 @@ export class ItemMagicoController {
     @Get(':id')
     @ApiOperation({ summary: 'Buscar um item magico por ID'})
     @ApiParam({ name: 'id', description: 'ID do item magic' })
-    async findById(@Param('id') id: string) {
+    async findById(@Param('id') id: string): Promise<ItemMagico> {
         return this.itemMagicoService.findById(id);
     }
 
@@ -33,5 +34,12 @@ export class ItemMagicoController {
     @ApiParam({ name: 'id', description: 'ID do item magico' })
     async update(@Param('id') id: string, @Body() dto: CreateItemMagicoDto) {
         return this.itemMagicoService.update(id, dto);
+    }
+
+    @Delete(':id')
+    @ApiOperation({ summary: 'Remover um item magico' })
+    @ApiParam({ name: 'id', description: 'ID do item magico' })
+    async remove(@Param('id') id: string): Promise<void> {
+        return this.itemMagicoService.remove(id);
     }
 }

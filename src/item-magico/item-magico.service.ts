@@ -34,8 +34,13 @@ export class ItemMagicoService {
         return this.itemMagicoModel.find().exec();
     }
 
-    async findById(id: string): Promise<ItemMagico | null> {
-        return this.itemMagicoModel.findById(id).exec();
+    async findById(id: string): Promise<ItemMagico> {
+        const item = await this.itemMagicoModel.findById(id).exec();
+
+        if(!item) {
+            throw new NotFoundException(`item magico com ID ${id} não encontrado`);
+        }
+        return item
     }
 
     async update(id: string, dto: CreateItemMagicoDto): Promise<ItemMagico> {

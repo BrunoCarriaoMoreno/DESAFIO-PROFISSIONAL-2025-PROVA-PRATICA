@@ -3,12 +3,17 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Personagem, PersonagemDocument } from './schemas/personagem.schema';
 import { CreatePersonagemDto } from './dto/create-personagem.dto';
+import { ItemMagico, ItemMagicoDocument, TipoItemMagico } from 'src/item-magico/schemas/item-magico.schema';
+
 
 @Injectable()
 export class PersonagemService {
     constructor(
         @InjectModel(Personagem.name)
-        private readonly personagemModel: Model<Personagem>
+        private readonly personagemModel: Model<Personagem>,
+
+        @InjectModel(ItemMagico.name)
+        private readonly itemMagicoModel: Model<ItemMagicoDocument>,
     ) {}
 
     async create(dto: CreatePersonagemDto): Promise<Personagem> {
@@ -60,5 +65,31 @@ export class PersonagemService {
         if(!result) {
             throw new NotFoundException(`Personagem com ID ${id} não encontrado`)
         }
+      }
+
+
+// vinculando o item magico ao personagem, dando nomes diferentes para os IDs
+      async adicionarItemMagico(personagemId: string, itemId: string):Promise<Personagem> {
+        const personagem = await this.personagemModel.findById(personagemId).populate('itensMagicos');
+        if (!personagem) {
+          throw new NotFoundException(`personagem com ID ${personagemId} não encontrado`)
+        }
+        
+// busca o item que vai ser adicionado
+        const item = await this.itemMagicoModel.findById(itemId);
+        if (!item) {
+          throw new NotFoundException(`item magico com ID ${itemId} não encontrado`);
+        }
+
+// regra para o item do tipo amuleto
+        if(item.tipo === TipoItemMagico.AMULETO) {
+          const JaPossuiAmuleto = personagem.itensMagicos.some((i: ItemMagico) => i.tipo === TipoItemMagico.AMULETO);
+          if (JaPossuiAmuleto) {
+            throw new NotFoundException(`personagem ja possui um amuleto`);
+          }
+        }
+
+        personagem.itensMagicos.push(item);
+        return personagem.save();
       }
     }

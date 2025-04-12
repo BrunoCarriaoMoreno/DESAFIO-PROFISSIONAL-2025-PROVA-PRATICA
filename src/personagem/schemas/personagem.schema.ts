@@ -1,4 +1,4 @@
-import { Document, Types } from "mongoose";
+import mongoose, { Document, Types } from "mongoose";
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { ItemMagico } from "src/item-magico/schemas/item-magico.schema";
 import { ref } from "process";
@@ -27,10 +27,10 @@ export class Personagem {
     level: number;
 
 // aqui ta armazenando um array de IDs da coleção 'ItemMagico' do banco
-    @Prop({ type: [{ type: Types.ObjectId, ref: 'ItemMagico' }],
+    @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'ItemMagico' }],
     default: [],
 })
-itensMagicos: Types.ObjectId[];
+itensMagicos: ItemMagico[];
 
 @Prop({ required: true, min: 0, max: 10 })
 forca: number;
