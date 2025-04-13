@@ -32,15 +32,41 @@ export class PersonagemService {
       }
 
       async findAll(): Promise<Personagem[]> {
-        return this.personagemModel.find().exec();
+        const personagens = await this.personagemModel.find().populate('itensMagicos').exec();
+
+        return personagens.map(personagem => {
+          let forcaTotal = personagem.forca;
+          let defesaTotal = personagem.defesa;
+
+          personagem.itensMagicos.forEach(item => {
+            forcaTotal += item.forca;
+            defesaTotal += item.defesa;
+          });
+
+          personagem.forca = forcaTotal;
+          personagem.defesa = defesaTotal;
+
+          return personagem;
+        })
       }
 
       async findById(id: string): Promise<Personagem> {
-        const personagem = await this.personagemModel.findById(id).exec();
+        const personagem = await this.personagemModel.findById(id).populate('itensMagicos').exec();
 
         if (!personagem) {
             throw new NotFoundException(`Personagem com ${id} não encontrado`);
         }
+
+        let forcaTotal = personagem.forca;
+        let defesaTotal = personagem.defesa;
+
+        personagem.itensMagicos.forEach(item => {
+          forcaTotal += item.forca;
+          defesaTotal += item.defesa;
+        });
+
+        personagem.forca = forcaTotal;
+        personagem.defesa = defesaTotal;
 
         return personagem;
       }

@@ -26,6 +26,20 @@ export class ItemMagicoService {
             );
         }
 
+        if (dto.tipo === 'Armadura' && dto.forca !== 0) {
+            throw new BadRequestException(
+                'Itens do tipo armadura devem ter zero de força',
+            )
+        }
+
+        if (dto.tipo === 'Arma') {
+            dto.defesa = 0;
+        }
+
+        if (dto.tipo === 'Armadura') {
+            dto.forca = 0;
+        }
+
         const novoItem = new this.itemMagicoModel(dto);
         return await novoItem.save();
     }
