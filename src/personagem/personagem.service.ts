@@ -70,6 +70,7 @@ export class PersonagemService {
 
 // vinculando o item magico ao personagem, dando nomes diferentes para os IDs
       async adicionarItemMagico(personagemId: string, itemId: string):Promise<Personagem> {
+        // aqui utilizei o método .populate para que ao invés de trazer apenas o ID do item, trazer todos os dados dele
         const personagem = await this.personagemModel.findById(personagemId).populate('itensMagicos');
         if (!personagem) {
           throw new NotFoundException(`personagem com ID ${personagemId} não encontrado`)
@@ -88,8 +89,38 @@ export class PersonagemService {
             throw new NotFoundException(`personagem ja possui um amuleto`);
           }
         }
-
         personagem.itensMagicos.push(item);
         return personagem.save();
+      }
+
+      async listarItensDoPersonagem(personagemId: string): Promise<ItemMagico[]> {
+        const personagem = await this.personagemModel.findById(personagemId).populate('itensMagicos');
+
+        if(!personagem) {
+          throw new NotFoundException('personagem não encontrado');
+        }
+
+        return personagem.itensMagicos;
+      }
+
+      async removerItemMagico(personagemId: string, itemId: string):Promise<Personagem> {
+        const personagem = await this.personagemModel.findById(personagemId);
+
+        if (!personagem) {
+          throw new NotFoundException(`personagem com ID${personagemId} não encontrado`);
+        }
+// verifica se o itemId está no array de IDs (que são os itens)
+        const index = personagem.itensMagicos.findIndex(
+          (item) => item.toString() === itemId,
+        );
+
+        if (index === -1) {
+          throw new NotFoundException('personagem não possui esse item')
+        }
+
+        personagem.itensMagicos.splice(index, 1);
+        await personagem.save();
+
+        return personagem;
       }
     }
